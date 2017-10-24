@@ -11,7 +11,9 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.stereotype.Service
+import org.springframework.web.bind.annotation.{GetMapping, RestController}
 import org.springframework.web.reactive.function.server.RequestPredicates._
+import org.springframework.web.reactive.function.server.{RouterFunction, ServerResponse}
 import org.springframework.web.reactive.function.server.RouterFunctions._
 import org.springframework.web.reactive.function.server.ServerResponse._
 import reactor.core.publisher.Flux
@@ -39,7 +41,7 @@ class Application {
       .deleteAll()
       .thenMany(tr.saveAll(tweets))
       .thenMany(tr.findAll())
-      .subscribe((t: Tweet) => println(
+      .subscribe(t => println(
         s"""=====================================================
            |@${t.author.handle} ${t.hashtags}
            |${t.text}
@@ -51,9 +53,9 @@ class Application {
 @Configuration
 class AkkaConfiguration {
 
-  @Bean def actorSystem() = ActorSystem.create("bootifulScala")
+  @Bean def actorSystem(): ActorSystem = ActorSystem.create("bootifulScala")
 
-  @Bean def actorMaterializer() = ActorMaterializer.create(this.actorSystem())
+  @Bean def actorMaterializer(): ActorMaterializer = ActorMaterializer.create(this.actorSystem())
 }
 
 @Service
@@ -76,13 +78,12 @@ class TweetService(tr: TweetRepository, am: ActorMaterializer) {
 class TweetRouteConfiguration(tweetService: TweetService) {
 
   @Bean
-  def routes() =
+  def routes(): RouterFunction[ServerResponse] =
     route(GET("/tweets"), _ => ok().body(tweetService.tweets(), classOf[Tweet]))
       .andRoute(GET("/hashtags/unique"), _ => ok().body(tweetService.hashtags(), classOf[HashTag]))
 
 }
 
-/*
 @RestController
 class TweetRestController(ts: TweetService) {
 
@@ -92,7 +93,6 @@ class TweetRestController(ts: TweetService) {
   @GetMapping(Array("/tweets"))
   def tweets(): Publisher[Tweet] = ts.tweets()
 }
-*/
 
 object Application extends App {
   SpringApplication.run(classOf[Application], args: _*)
