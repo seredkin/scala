@@ -3,19 +3,20 @@ package tweets
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
+import org.joda.time.DateTime
 import org.reactivestreams.Publisher
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.{ApplicationRunner, SpringApplication}
 import org.springframework.context.annotation.{Bean, Configuration}
-import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.{CreatedDate, Id}
+import org.springframework.data.mongodb.config.EnableMongoAuditing
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.{GetMapping, RestController}
 import org.springframework.web.reactive.function.server.RequestPredicates._
-import org.springframework.web.reactive.function.server.{RouterFunction, ServerResponse}
 import org.springframework.web.reactive.function.server.RouterFunctions._
 import org.springframework.web.reactive.function.server.ServerResponse._
+import org.springframework.web.reactive.function.server.{RouterFunction, ServerResponse}
 import reactor.core.publisher.Flux
 
 import scala.beans.BeanProperty
@@ -25,7 +26,7 @@ import scala.collection.JavaConverters
 class Application {
 
   @Bean
-  def init(tr: TweetRepository): ApplicationRunner = args => {
+  def init(tr: TweetRepository, ler: LogEntryRepository): ApplicationRunner = args => {
     val viktor = Author("viktorklang")
     val jonas = Author("jboner")
     val josh = Author("starbuxman")
@@ -37,6 +38,11 @@ class Application {
       Tweet("a reminder: @SpringBoot lets you pair-program with the #Spring team.", josh),
       Tweet("whatever your next #platform is, don't build it yourself. \n\nEven companies with the $$ and motivation to do it fail. a LOT.", josh)
     )
+
+    val logs = Flux.just(LogEntry("Log message 01"), LogEntry("Log message 02"), LogEntry("Log message 03"))
+    ler.deleteAll().thenMany(ler.saveAll(logs)).thenMany(ler.findAll())
+      .subscribe(l => println(s"""${l.id} \t ${l.message}"""))
+
     tr
       .deleteAll()
       .thenMany(tr.saveAll(tweets))
@@ -47,8 +53,14 @@ class Application {
            |${t.text}
          """.stripMargin
       ))
+
   }
 }
+
+object Application extends App {
+  SpringApplication.run(classOf[Application], args: _*)
+}
+
 
 @Configuration
 class AkkaConfiguration {
@@ -59,7 +71,7 @@ class AkkaConfiguration {
 }
 
 @Service
-class TweetService(tr: TweetRepository, am: ActorMaterializer) {
+class TweetService(tr: TweetRepository, ler: LogEntryRepository, am: ActorMaterializer) {
 
   def tweets(): Publisher[Tweet] = tr.findAll()
 
@@ -72,18 +84,23 @@ class TweetService(tr: TweetRepository, am: ActorMaterializer) {
       .runWith(Sink.asPublisher(true)) {
         am
       }
+
+  def logs(): Publisher[LogEntry] = ler.findAll()
 }
 
 @Configuration
+@EnableMongoAuditing
 class TweetRouteConfiguration(tweetService: TweetService) {
 
   @Bean
   def routes(): RouterFunction[ServerResponse] =
     route(GET("/tweets"), _ => ok().body(tweetService.tweets(), classOf[Tweet]))
       .andRoute(GET("/hashtags/unique"), _ => ok().body(tweetService.hashtags(), classOf[HashTag]))
+      .andRoute(GET("/logs"), _ => ok().body(tweetService.logs(), classOf[LogEntry]))
 
 }
 
+/*
 @RestController
 class TweetRestController(ts: TweetService) {
 
@@ -92,11 +109,10 @@ class TweetRestController(ts: TweetService) {
 
   @GetMapping(Array("/tweets"))
   def tweets(): Publisher[Tweet] = ts.tweets()
-}
 
-object Application extends App {
-  SpringApplication.run(classOf[Application], args: _*)
+
 }
+*/
 
 
 trait TweetRepository extends ReactiveMongoRepository[Tweet, String]
@@ -106,6 +122,18 @@ case class Author(@BeanProperty @Id handle: String)
 
 @Document
 case class HashTag(@BeanProperty @Id tag: String)
+
+@Document
+case class LogEntry(@BeanProperty message: String) {
+  @BeanProperty
+  @Id var id: String = _
+
+  @BeanProperty
+  @CreatedDate var created: DateTime = null
+
+}
+
+trait LogEntryRepository extends ReactiveMongoRepository[LogEntry, String]
 
 @Document
 case class Tweet(@BeanProperty @Id text: String, @BeanProperty author: Author) {
