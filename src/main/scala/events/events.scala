@@ -1,11 +1,17 @@
-package tweets
+package events
+
+import javax.sql.DataSource
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
 import org.joda.time.DateTime
+import org.jooq.DSLContext
+import org.jooq.impl.DSL
+import org.jooq.impl.DSL._
 import org.reactivestreams.Publisher
-import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+import org.springframework.boot.autoconfigure.{EnableAutoConfiguration, SpringBootApplication}
 import org.springframework.boot.{ApplicationRunner, SpringApplication}
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.data.annotation.{CreatedDate, Id}
@@ -71,7 +77,11 @@ class AkkaConfiguration {
 }
 
 @Service
-class TweetService(tr: TweetRepository, ler: LogEntryRepository, am: ActorMaterializer) {
+class TweetService(tr: TweetRepository, ler: LogEntryRepository, am: ActorMaterializer, dsl: DSLContext, ds:DataSource) {
+  def accounts(): String  = {
+    "Amount of user accounts "+DSL.using(ds.getConnection).fetchCount(table(name("brokerage", "account")))
+  }
+
 
   def tweets(): Publisher[Tweet] = tr.findAll()
 
@@ -94,9 +104,12 @@ class TweetRouteConfiguration(tweetService: TweetService) {
 
   @Bean
   def routes(): RouterFunction[ServerResponse] =
-    route(GET("/tweets"), _ => ok().body(tweetService.tweets(), classOf[Tweet]))
+    route(GET("/events"), _ => ok().body(tweetService.tweets(), classOf[Tweet]))
       .andRoute(GET("/hashtags/unique"), _ => ok().body(tweetService.hashtags(), classOf[HashTag]))
       .andRoute(GET("/logs"), _ => ok().body(tweetService.logs(), classOf[LogEntry]))
+      .andRoute(GET("/accounts"), _ => ok().syncBody(tweetService.accounts(), classOf[String]))
+
+
 
 }
 

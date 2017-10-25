@@ -1,0 +1,12 @@
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      driver-class-name: org.postgresql.Driver
+      jdbc-url: jdbc:postgresql:live_dump_4
+      username: live_dump
+      password: live_dump
+      connection-test-query: SELECT 1
+      connection-timeout: 10000
+      maximum-pool-size: 100
