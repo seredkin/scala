@@ -8,13 +8,13 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>scala, spring boot and kafka bootstrap project</name>
-	<description>Demo project for Spring Boot</description>
+	<name>scala-boot-kafka</name>
+	<description>Spring Boot with Scala and reactive APIs</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.0.0.M4</version>
+		<version>2.0.0.M5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
@@ -42,6 +42,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
