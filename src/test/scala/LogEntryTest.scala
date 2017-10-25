@@ -23,7 +23,6 @@ class LogEntryTest {
   }
 
   @Test def testAccounts(): Unit = {
-    //TODO Anton check why null
     val str = webClient.get.uri("/accounts").exchange().returnResult(classOf[String]).getResponseBody.blockLast()
     println("ACCOUNTS: "+str)
 
