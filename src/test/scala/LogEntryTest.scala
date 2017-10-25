@@ -24,5 +24,12 @@ class LogEntryTest {
       .getResponseBody.buffer(3).blockLast().forEach( t => print("\tMESSAGE\t"+t.toString))
 
   }
+
+  @Test def testAccounts(): Unit = {
+    //TODO Anton check why null
+    val str = webClient.get.uri("/accounts").exchange().returnResult(classOf[String]).getResponseBody.blockLast()
+    println("ACCOUNTS: "+str)
+
+  }
 }
 
