@@ -1,4 +1,4 @@
-package events.config
+package com.example.config
 
 import javax.sql.DataSource
 
@@ -13,7 +13,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 
 
 @Configuration
-@ComponentScan(basePackages = Array("events"))
+@ComponentScan(basePackages = Array("com.example"))
 @EnableCaching
 class RootConfig(@Autowired val env: Environment) {
 

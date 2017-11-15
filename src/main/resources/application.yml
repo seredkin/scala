@@ -1,15 +1,16 @@
-#db.driver=org.h2.Driver
-# db.url=jdbc:h2:~/loan-data
-# db.username=sa
-# db.password=
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql:loan_data
     username: loan_data
     password: loan_data
-#    type: com.zaxxer.hikari.HikariDataSource
-#    hikari:
-#      connection-test-query: SELECT 1
-#      maximum-pool-size: 100
 
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+      group-id: group1
+    template:
+      default-topic: topic1
+server:
+  port: 11015

@@ -1,5 +1,5 @@
 import com.example.jooq_dsl.Tables
-import events.config.RootConfig
+import com.example.config.RootConfig
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.jooq.DSLContext
@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @RunWith(classOf[SpringRunner])
-@SpringBootTest(classes = Array(classOf[events.Application], classOf[RootConfig]),
+@SpringBootTest(classes = Array(classOf[com.example.Application], classOf[RootConfig]),
   webEnvironment = WebEnvironment.RANDOM_PORT)
 class LoanDataTest {
 

@@ -1,4 +1,4 @@
-import events.config.{RootConfig, WebConfig}
+import com.example.config.{RootConfig, WebConfig}
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -8,7 +8,7 @@ import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @RunWith(classOf[SpringRunner])
-@SpringBootTest(classes = Array(classOf[events.Application], classOf[RootConfig],
+@SpringBootTest(classes = Array(classOf[com.example.Application], classOf[RootConfig],
   classOf[WebConfig]), webEnvironment = WebEnvironment.RANDOM_PORT)
 class LogEntryTest {
 

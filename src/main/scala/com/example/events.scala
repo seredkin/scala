@@ -1,14 +1,16 @@
-package events
+package com.example
 
 import com.example.jooq_dsl.Tables
 import com.example.jooq_dsl.tables.pojos.Loan
 import org.joda.time.DateTime
 import org.jooq.DSLContext
 import org.reactivestreams.Publisher
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.{ApplicationRunner, SpringApplication}
 import org.springframework.context.annotation.{Bean, Configuration}
-import org.springframework.stereotype.Service
+import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.stereotype.{Component, Service}
 import org.springframework.web.reactive.function.server.RequestPredicates._
 import org.springframework.web.reactive.function.server.RouterFunctions._
 import org.springframework.web.reactive.function.server.ServerResponse._
@@ -31,6 +33,8 @@ class Application {
 object Application extends App {
   SpringApplication.run(classOf[Application], args: _*)
 }
+
+
 
 
 @Service
